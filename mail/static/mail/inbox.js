@@ -58,6 +58,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+// displays a message in #message div using bootstrap alert type
+function display_message(type, message) {
+  document.querySelector('#messages').innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+}
+
 function compose_email() {
 
   // Show compose view and hide other views
@@ -79,9 +84,18 @@ function load_mailbox(mailbox) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#messages').innerHTML = '';
 
+  // clear localStorage so previously viewed email id won't screw everything up
+  localStorage.clear();
+
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
   
+  // create new >row>col divs in inbox.html #emails-view to be container box for email
+  let emails_view_box = document.querySelector('#emails-view');
+  let emails_view_row = document.createElement('div');
+  emails_view_row.className = 'row';
+  emails_view_box.append(emails_view_row);
+
   // load emails for selected mailbox
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
@@ -90,119 +104,119 @@ function load_mailbox(mailbox) {
     // iterate through emails 
     emails.forEach(element => {
 
-      // create new div in inbox.html #emails-view with email id, sender, subject, and timestamp
-      let email_row = document.createElement('div');
-
-      // set row id to email#id, which is used by view_email function
-      email_row.id = `email${element.id}`;
-
+      let email_box = document.createElement('div');
+      email_box.id = `email${element.id}`;
+      
+      // create a nested row div for mailbox view with read status icon, sender, subject, date 
+      let email_mailbox_row = document.createElement('div');
+      email_mailbox_row.id = `email-mailbox-row${element.id}`;
+      email_mailbox_row.className = 'row';
       // set row icons
-      let row_icons = '';
+      let icon = '';
       // set class to row, and if read, add class read
       if (element.read === true) {
-        email_row.className = 'row list-row read';
-        row_icons = '<i class="far fa-envelope-open"></i>';
+        icon = '<i class="far fa-envelope-open"></i>';
+        email_box.className = 'col-12 email-box read';
       } else {
-        email_row.className = 'row list-row new';
-        row_icons = '<i class="far fa-envelope"></i>';
+        icon = '<i class="far fa-envelope"></i>';
+        email_box.className = 'col-12 email-box new';
       }
+      emails_view_row.append(email_box);
 
       // inside row div, add col div with sender, subject, timestamp
-      email_row.innerHTML = `<div class="col-1 row-icons">${row_icons}</div>
-      <div class="col-4" id="sender${element.id}">${element.sender}</div>
-      <div class="col-4" id="subject${element.id}">${element.subject}</div>
-      <div class="col-3 ts" id="senton${element.id}">${element.timestamp}</div>`;
-      
-      // add event listener to view email
-      email_row.addEventListener('click', function () {
+      if (mailbox === 'sent') {
+        email_mailbox_row.innerHTML = `<div class="col-1" id="status-icon"><i class="fas fa-paper-plane"></i></div>
+        <div class="col-4">${element.recipients}</div>
+        <div class="col-4">${element.subject}</div>
+        <div class="col-3">${element.timestamp}</div>`;
+      } else {
+        email_mailbox_row.innerHTML = `<div class="col-1" id="status-icon">${icon}</div>
+        <div class="col-4">${element.sender}</div>
+        <div class="col-4">${element.subject}</div>
+        <div class="col-3">${element.timestamp}</div>`;
+      }
 
-        // TRY MOVING THIS TO view_email TOMORROW!
-        // check if email row is already open
-        if (email_row.classList.contains('open')) {
-          console.log('this email is already open!');
-        } else {
-          view_email(element.id);
-        }
-        
+      // add event listener to view email
+      email_mailbox_row.addEventListener('click', function () {
+        view_email(element.id);
       });
 
-      // add email_row to emails-view div
-      document.querySelector('#emails-view').append(email_row);
+      // add email_row to #emails-view>#id container
+      email_box.append(email_mailbox_row);
 
+      // create another hidden row div to contain email contents
+      let email_contents_row = document.createElement('div');
+      email_contents_row.id = `email-contents-row${element.id}`;
+      email_contents_row.style.display = 'none';
+      email_contents_row.className = 'row';
+      email_box.append(email_contents_row);
+
+      let email_contents_col = document.createElement('div');
+      email_contents_col.className = 'col-12';
+      email_contents_row.append(email_contents_col);
+
+      let email_header_row1 = document.createElement('div');
+      email_header_row1.className = 'row';
+      let email_header_row2 = document.createElement('div');
+      email_header_row2.className = 'row';
+      let email_body = document.createElement('div');
+      email_body.className = 'row';
+
+      email_header_row1.innerHTML = `<div class="col-1" id="close-icon"><i class="far fa-window-close"></i></div>
+      <div class="col-4" id="sender${element.id}">From ${element.sender}</div>
+      <div class="col-4" id="subject${element.id}">Subject: ${element.subject}</div>
+      <div class="col-3" id="sent${element.id}">Sent on ${element.timestamp}</div>`;
+      email_header_row2.innerHTML = `<div class="col-1"></div>
+      <div class="col-11" id="recipients${element.id}">To: ${element.recipients}</div>`;
+      email_body.innerHTML = `<div class="col-12 email-body">${element.body}</div>`;
+
+      email_contents_col.append(email_header_row1);
+      email_contents_col.append(email_header_row2);
+      email_contents_col.append(email_body);
+      
     });
   });
 }
 
-// displays a message in #message div using bootstrap alert type
-function display_message(type, message) {
-  document.querySelector('#messages').innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
-}
-
 function view_email(id) {
 
-  // select requested email id
-  let view_email_row = document.querySelector(`#email${id}`);
+  // if there is NOT (!) something in local storage called viewing
+  if (!localStorage.getItem('viewing')) {
+    // set viewing to requested email id so can check for already open email
+    localStorage.setItem('viewing', id);
+  } else {
+    // if there is an email open already, hide contents and display mailbox
+    let last_viewed = localStorage.getItem('viewing');
+    close_email(last_viewed);
+    // set viewing to requested email id
+    localStorage.setItem('viewing', id);
+  }
 
-  
-
-  // add 'open' to classes
-  view_email_row.classList.add('open');
-  
-  // switch icon to close icon
-  let icon_col = view_email_row.querySelector('.row-icons');
-  icon_col.innerHTML = '';
-  let close_icon = document.createElement('i');
-  close_icon.className = 'far fa-window-close';
-
-  // add event listener to icon to close email
-  close_icon.addEventListener('click', function() {
-    console.log('closing event listener clicked!');
-    close_email(view_email_row);
+  let email_contents_row = document.querySelector(`#email-contents-row${id}`);
+  email_contents_row.style.display = "flex";
+  email_contents_row.previousSibling.style.display = "none";
+  // add event listener to view email
+  let close_icon = email_contents_row.querySelector('#close-icon');
+  close_icon.addEventListener('click', function () {
+    close_email(id);
   });
-  icon_col.append(close_icon);
-
-  // GET request to load contents of email object
-  fetch(`/emails/${id}`)
-  .then(response => response.json())
-  .then(email => {
-
-      // plug in sender, subject, recipients, timestamp, body with view styling
-      document.querySelector(`#sender${id}`).innerHTML = `<span class="show-on-view">From: </span>${email.sender}`;
-      document.querySelector(`#subject${id}`).innerHTML = `<span class="show-on-view">Subject: </span>${email.subject}`;
-      document.querySelector('#view-recipients').innerHTML = `To: ${email.recipients}`;
-      document.querySelector(`#senton${id}`).innerHTML = `<span class="show-on-view">Sent on </span>${email.timestamp}`;
-      document.querySelector('#view-body').innerHTML = email.body;
-
-      // move open email div to current row of emails list and change display to show
-      let email_contents = document.querySelector('#open-email');
-      view_email_row.insertAdjacentElement('beforeend', email_contents);
-      email_contents.style.display = 'block';
-
-      console.log('the now open email has class ', view_email_row.getAttribute('class'));
-
-  });
-  
-}
-
-function close_email(email_row) {
-  
-  document.querySelector('#open-email').style.display = 'none';
-  let read_icon = email_row.querySelector('.row-icons');
-  read_icon.innerHTML = '<i class="far fa-envelope-open"></i>';
-  email_row.querySelector('.show-on-view').remove();
-
-  let email_id = email_row.id;
-  email_id = email_id.substring(5);
-  console.log('closing email', email_id);
 
   // mark email as read with PUT request
-  fetch(`/emails/${email_id}`, {
+  fetch(`/emails/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
         read: true
     })
   })
+}
 
-  email_row.classList.remove('open');
-
+function close_email(id) {
+  let closing_email_contents = document.querySelector(`#email-contents-row${id}`);
+  closing_email_contents.style.display = "none";
+  let show_mailbox_row = closing_email_contents.previousSibling;
+  show_mailbox_row.style.display = "flex";
+  show_mailbox_row.parentElement.className = 'col-12 email-box read';
+  let last_icon = closing_email_contents.previousSibling.querySelector('#status-icon');
+  last_icon.innerHTML = '<i class="far fa-envelope-open"></i>';
+  localStorage.clear();
 }

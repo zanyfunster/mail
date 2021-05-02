@@ -2,48 +2,30 @@ textarea {
     min-height: 400px;
 }
 
-.list-row:hover {
-    box-shadow: 2px 2px 5px 1px lightgray;
-}
-
-.ts {
-    font-size: small;
-}
-
-.list-row {
+.email-box {
     border: 1px solid lightgray;
     border-radius: 3px;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
     padding: 5px;
     height: auto;
 }
 
-#emails-view .read {
-    background-color: rgb(239, 248, 250);
-}
-
-#emails-view .view {
-    background-color: rgb(239, 248, 250);
-    font-weight: bold;
-    height: auto;
+.email-box:hover {
     box-shadow: 2px 2px 5px 1px lightgray;
 }
 
-.view-details-row {
-    background-color: rgb(239, 248, 250);
-    font-weight: bold;
-    padding: 3px;
-    border: none;
+.read {
+    background-color: rgb(230, 230, 230);
 }
 
-#view-body {
+.new {
     background-color: white;
-    padding: 4px;
-    height: 380px;
-    color: black;
-    border-style: none;
+    font-weight: bold;
+    height: auto;
 }
 
-#view-options {
-    padding: 3px;
+.email-body {
+    height: 300px;
+    padding: 25px;
+    background-color: white;
 }
