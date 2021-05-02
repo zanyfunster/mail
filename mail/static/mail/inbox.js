@@ -163,12 +163,18 @@ function load_mailbox(mailbox) {
       email_body.className = 'row';
 
       email_header_row1.innerHTML = `<div class="col-1" id="close-icon"><i class="far fa-window-close"></i></div>
-      <div class="col-4" id="sender${element.id}">From ${element.sender}</div>
+      <div class="col-4" id="sender${element.id}">From: ${element.sender}</div>
       <div class="col-4" id="subject${element.id}">Subject: ${element.subject}</div>
       <div class="col-3" id="sent${element.id}">Sent on ${element.timestamp}</div>`;
       email_header_row2.innerHTML = `<div class="col-1"></div>
-      <div class="col-11" id="recipients${element.id}">To: ${element.recipients}</div>`;
-      email_body.innerHTML = `<div class="col-12 email-body">${element.body}</div>`;
+      <div class="col-8" id="recipients${element.id}">To: ${element.recipients}</div>
+      <div class="col-3" id="email-buttons"></div>`;
+      
+      const body_text = element.body;
+      let body_col = document.createElement('div');
+      body_col.className = 'col-12 email-body';
+      body_col.innerText = body_text;
+      email_body.append(body_col);
 
       email_contents_col.append(email_header_row1);
       email_contents_col.append(email_header_row2);
@@ -192,14 +198,10 @@ function view_email(id) {
     localStorage.setItem('viewing', id);
   }
 
+  // show email contents and hide mailbox row for selected email
   let email_contents_row = document.querySelector(`#email-contents-row${id}`);
   email_contents_row.style.display = "flex";
   email_contents_row.previousSibling.style.display = "none";
-  // add event listener to view email
-  let close_icon = email_contents_row.querySelector('#close-icon');
-  close_icon.addEventListener('click', function () {
-    close_email(id);
-  });
 
   // mark email as read with PUT request
   fetch(`/emails/${id}`, {
@@ -208,6 +210,56 @@ function view_email(id) {
         read: true
     })
   })
+
+  // add event listener on close icon to close email
+  let close_icon = email_contents_row.querySelector('#close-icon');
+  close_icon.addEventListener('click', function () {
+    close_email(id);
+  });
+
+  // show buttons for reply and archive, if there aren't already buttons
+  let email_buttons = email_contents_row.querySelector('#email-buttons');
+  if (!email_buttons.querySelector('button')) {
+
+    let reply_btn = document.createElement('button');
+    let archive_btn = document.createElement('button');
+    reply_btn.type = 'button';
+    reply_btn.className = 'btn btn-light btn-sm';
+    reply_btn.innerHTML = '<i class="fas fa-reply"></i> reply';
+    archive_btn.type = 'button';
+    archive_btn.className = 'btn btn-light btn-sm';
+    archive_btn.innerHTML = '<i class="fas fa-archive"></i> archive';
+    email_buttons.append(reply_btn);
+    email_buttons.append(archive_btn);
+
+    reply_btn.addEventListener('click', function () {
+      reply(id);
+    });
+
+    archive_btn.addEventListener('click', async function () {
+
+      // use async function and await fetch to send put request with archive status
+      // by doing so, function won't proceed until promise received
+      const response = await fetch(`/emails/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            archived: true
+        })
+      })
+
+      // get message info for success display
+      let sender = email_contents_row.querySelector(`#sender${id}`).innerHTML.slice(5);
+      let subject = email_contents_row.querySelector(`#subject${id}`).innerHTML.slice(8);
+      // after promise, then load mailbox so archived message won't still show up
+      if (response) {
+        load_mailbox('inbox');
+        display_message('info', `Archived message from ${sender} re: ${subject}`);
+      }
+      
+
+    });
+  }
+
 }
 
 function close_email(id) {
@@ -220,3 +272,43 @@ function close_email(id) {
   last_icon.innerHTML = '<i class="far fa-envelope-open"></i>';
   localStorage.clear();
 }
+
+function reply(id) {
+
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#messages').innerHTML = '';
+
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+
+    // prefill composition fields
+    document.querySelector('#compose-recipients').value = email.sender;
+    let subject = email.subject;
+    let subject_start = subject.substring(0,3);
+    if (subject_start === 'Re:') {
+      document.querySelector('#compose-subject').value = email.subject;
+    } else {
+      console.log('subject does not contain re! in substring', subject_start);
+    }
+    
+
+    const response_body = `
+    
+    ----- 
+    On ${email.timestamp}, ${email.sender} wrote:
+
+    ${email.body}`;
+
+    document.querySelector('#compose-body').value = response_body;
+
+  });
+
+}
+
+///// TO DO TOMORROW!
+// create unarchive button on archive box
+// add get request for individual email in view email, and move filling in email contents to view email function
+// fix shitty styling issues with flexbox rows/email body

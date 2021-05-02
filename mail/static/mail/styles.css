@@ -15,17 +15,23 @@ textarea {
 }
 
 .read {
-    background-color: rgb(230, 230, 230);
+    background-color: rgb(240, 239, 239);
+    padding: 5px;
 }
 
 .new {
     background-color: white;
     font-weight: bold;
     height: auto;
+    padding: 5px;
 }
 
 .email-body {
     height: 300px;
     padding: 25px;
     background-color: white;
+}
+
+.btn {
+    margin-right: 20px;
 }
