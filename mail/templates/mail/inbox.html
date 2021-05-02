@@ -10,10 +10,27 @@
     <button class="btn btn-sm btn-outline-primary" id="archived">Archived</button>
     <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
     <hr>
-    <div id="messages"></div>
-
-    <div id="emails-view">
+    <div id="messages">
     </div>
+
+    <div id="open-email" class="container" style="display: none;">
+        <div class="row view-details-row">
+            <div class="col-1"></div>
+            <div class="col-10" id="view-recipients"></div>
+        </div>
+        <div class="row">
+            <div class="col-12" id="view-body"></div>
+        </div>
+        <div class="row" id="view-options">
+            <div class="col-4">
+                <button type="button" class="btn btn-outline-dark btn-sm"><i class="fas fa-reply"></i> Reply</button>
+                <button type="button" class="btn btn-outline-dark btn-sm"><i class="fas fa-archive"></i> Archive</button>
+            </div>
+            <div class="col-8"></div>            
+        </div>
+    </div>
+
+    <div id="emails-view" class="container"></div>
 
     <div id="compose-view">
         <h3>New Email</h3>
