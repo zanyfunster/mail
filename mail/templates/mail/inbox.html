@@ -2,34 +2,65 @@
 {% load static %}
 
 {% block body %}
-    <h2>ChiMail: {{ request.user.email }}</h2>
-
-    <button class="btn btn-sm btn-outline-primary" id="inbox">Inbox</button>
-    <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
-    <button class="btn btn-sm btn-outline-primary" id="sent">Sent</button>
-    <button class="btn btn-sm btn-outline-primary" id="archived">Archived</button>
-    <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
-    <hr>
+    <div class="container">
+        <div class="row" id="chi-header">
+            <div class="col-10 mt-2">
+                <h1>CHI-MAIL</h1>
+            </div>
+            <div class="col-2" id="chi-logo"><img src="{% static 'img/chi-mail.png' %}"></div>
+        </div>
+        <div class="row" id="nada"></div>
+        <div class="row" id="chi-menu">
+            <div class="col-6">
+                <button class="btn btn-sm" id="inbox">Inbox</button>
+                <button class="btn btn-sm" id="compose">Compose</button>
+                <button class="btn btn-sm" id="sent">Sent</button>
+                <button class="btn btn-sm" id="archived">Archived</button>
+            </div>
+            <div id="account" class="col-6 mt-1">
+                <h5>Hola, {{ request.user.email }}! | <a href="{% url 'logout' %}">Log Out</a>
+            </div>
+        </div>
+    </div>
+    
     <div id="messages">
     </div>
 
     <div id="emails-view" class="container">
     </div>
 
-    <div id="compose-view">
-        <h3>New Email</h3>
+    <div id="compose-view" class="container">
+        <div class="row">
+            <div class="col-12"><h3>Compose New Chi-Mail</h3></div>
+        </div>
         <form id="compose-form">
-            <div class="form-group">
-                From: <input disabled class="form-control" value="{{ request.user.email }}">
+            <div class="row form-group">
+                <label for="sender-input" class="col-1 col-form-label">From: </label>
+                    <div class="col-11">
+                <input disabled class="form-control" value="{{ request.user.email }}" id="sender-input">
+                </div>
             </div>
-            <div class="form-group">
-                To: <input id="compose-recipients" class="form-control">
+            <div class="form-group row">
+                <label for="compose-recipients" class="col-1 col-form-label">To: </label>
+                <div class="col-11">
+                <input id="compose-recipients" class="form-control" placeholder="Chihuahua(s)">
+                </div>
             </div>
-            <div class="form-group">
-                <input class="form-control" id="compose-subject" placeholder="Subject">
+            <div class="form-group row">
+                <label for="compose-subject" class="col-1 col-form-label">Subject: </label>
+                <div class="col-11">
+                    <input class="form-control" id="compose-subject" placeholder="Subject">
+                </div>
             </div>
-            <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
-            <input type="submit" class="btn btn-primary"/>
+            <div class="row">
+                <div class="col-12">
+                    <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-2"><input type="submit" class="btn"/></div>
+                <div class="col-10"></div>   
+            </div>
         </form>
     </div>
 {% endblock %}

@@ -2,20 +2,85 @@ textarea {
     min-height: 400px;
 }
 
+body {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 500;
+}
+
+#chi-header {
+    background-color: gold;
+    padding: 8px;
+}
+
+#chi-logo {
+    max-width: 100%;
+    height: auto;
+    text-align: right;
+}
+
+h1 {
+    font-family: 'Rye', cursive;
+    font-size: 68px;
+    color: black;
+    font-weight: 400;
+}
+
+h5 {
+    color: gold;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+a {
+    color: gold;
+    font-weight: 600;
+}
+
+a:hover {
+    font-weight: 600;
+    text-decoration: none;
+    color: rgb(255, 174, 0);
+    text-shadow: 1px 1px 2px #464646;
+}
+
+h3 {
+    font-family: 'Rye', cursive;
+    margin-bottom: 15px;
+    margin-top: 10px
+}
+
+#nada {
+    background-color: #fff584;
+    height: 10px;
+}
+
+#chi-menu {
+    background-color: black;
+    padding: 5px;
+}
+
+#account {
+    text-align: right;
+}
+
 .email-box {
-    border: 1px solid lightgray;
+    border: 1px solid #b0afa2;
     border-radius: 3px;
     margin-bottom: 5px;
     padding: 5px;
     height: auto;
 }
 
+#email-buttons {
+    text-align: right;
+}
+
 .email-box:hover {
-    box-shadow: 2px 2px 5px 1px lightgray;
+    box-shadow: 1px 1px 3px #616161;
 }
 
 .read {
-    background-color: rgb(240, 239, 239);
+    background-color: #f4f4f4;
     padding: 5px;
 }
 
@@ -26,12 +91,74 @@ textarea {
     padding: 5px;
 }
 
+.email-mailbox-row, .email-contents-row {
+    margin: 0px;
+    padding: 5px;
+}
+
 .email-body {
     height: 300px;
     padding: 25px;
     background-color: white;
+    overflow-y: scroll;
+    border: 1px solid darkslategray;
 }
 
 .btn {
     margin-right: 20px;
+    border: 1px solid rgb(75, 75, 75);
+    background-color: white;
+    color: black;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background-color: gold;
+    font-weight: 600;
+    border: 1px solid rgb(40, 40, 40);
+}
+
+.btn:focus {
+    outline: none;
+    border: 1px solid darkgray;
+    box-shadow: -1px -1px 2px 0 gold, 1px 1px 2px 0 gold;
+}
+
+.form-control {
+    outline: none !important;
+}
+
+.form-control:focus {
+    outline: none;
+    border: 1px solid darkgray;
+    box-shadow: -1px -1px 2px 0 gold, 1px 1px 2px 0 gold;
+    background-color: white;
+}
+
+#messages {
+    height: 15px;
+    margin-bottom: 40px;
+}
+
+.ellipsis-line {
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.email-headers {
+    padding-bottom: 8px;
+    font-weight: 600;
+}
+
+.timestamp {
+    text-align: right;
+    padding-right: 35px;
+}
+
+.close-icon {
+    font-size: large;
+}
+.close-icon i:hover {
+    background-color: gold;
 }

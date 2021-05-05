@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (result.message) {
           // view sent messages and display success alert message
           load_mailbox('sent');
-          display_message('success', result.message);
+          display_message('warning', result.message);
       
           // return false to prevent additional get request
           return false;
@@ -60,7 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // displays a message in #message div using bootstrap alert type
 function display_message(type, message) {
+  document.querySelector('#messages').style.visibility = 'visible';
   document.querySelector('#messages').innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+  setTimeout(function() { 
+    document.querySelector('#messages').style.visibility = 'hidden';
+  }, 3000);
 }
 
 function compose_email() {
@@ -110,7 +114,7 @@ function load_mailbox(mailbox) {
       // create a nested row div for mailbox view with read status icon, sender, subject, date 
       let email_mailbox_row = document.createElement('div');
       email_mailbox_row.id = `email-mailbox-row${element.id}`;
-      email_mailbox_row.className = 'row';
+      email_mailbox_row.className = 'row email-mailbox-row';
       // set row icons
       let icon = '';
       // set class to row, and if read, add class read
@@ -125,14 +129,14 @@ function load_mailbox(mailbox) {
 
       // inside row div, add col div with sender, subject, timestamp
       if (mailbox === 'sent') {
-        email_mailbox_row.innerHTML = `<div class="col-1" id="status-icon"><i class="fas fa-paper-plane"></i></div>
-        <div class="col-4">${element.recipients}</div>
-        <div class="col-4">${element.subject}</div>
+        email_mailbox_row.innerHTML = `<div class="col-1" id="status-icon">${icon}</div>
+        <div class="col-4 ellipsis-line">${element.recipients}</div>
+        <div class="col-4 ellipsis-line">${element.subject}</div>
         <div class="col-3">${element.timestamp}</div>`;
       } else {
         email_mailbox_row.innerHTML = `<div class="col-1" id="status-icon">${icon}</div>
-        <div class="col-4">${element.sender}</div>
-        <div class="col-4">${element.subject}</div>
+        <div class="col-4 ellipsis-line">${element.sender}</div>
+        <div class="col-4 ellipsis-line">${element.subject}</div>
         <div class="col-3">${element.timestamp}</div>`;
       }
 
@@ -148,7 +152,7 @@ function load_mailbox(mailbox) {
       let email_contents_row = document.createElement('div');
       email_contents_row.id = `email-contents-row${element.id}`;
       email_contents_row.style.display = 'none';
-      email_contents_row.className = 'row';
+      email_contents_row.className = 'row email-contents-row';
       email_box.append(email_contents_row);
       
     });
@@ -172,14 +176,17 @@ function view_email(id) {
   // select requested email_contents_row
   let email_contents_row = document.querySelector(`#email-contents-row${id}`);
 
+  // if email row is not empty (email has not yet been viewed during this session), add contents of requested email
+  if (!email_contents_row.querySelector('div')) {
+
   // inside row, create divs for requested email col and nested header rows and body text row
   let email_contents_col = document.createElement('div');
   email_contents_col.className = 'col-12';
   email_contents_row.append(email_contents_col);
   let email_header_row1 = document.createElement('div');
-  email_header_row1.className = 'row';
+  email_header_row1.className = 'row email-headers';
   let email_header_row2 = document.createElement('div');
-  email_header_row2.className = 'row';
+  email_header_row2.className = 'row email-headers';
   let email_body = document.createElement('div');
   email_body.className = 'row';
 
@@ -188,8 +195,9 @@ function view_email(id) {
   .then(response => response.json())
   .then(email => {
 
+    // add a close icon in place of read/unread icon
     let close_icon = document.createElement('div');
-    close_icon.className = 'col-1';
+    close_icon.className = 'col-1 close-icon';
     close_icon.innerHTML = '<i class="far fa-window-close"></i>';
 
     // add event listener on close icon to close email
@@ -200,39 +208,38 @@ function view_email(id) {
 
     // add remaining header guts for requested email
     let sender_div = document.createElement('div');
-    sender_div.className = 'col-4';
+    sender_div.className = 'col-4 ellipsis-line';
     sender_div.id = `sender${email.id}`;
     sender_div.innerHTML = `From: ${email.sender}`;
     email_header_row1.append(sender_div);
 
-    let subject_div = document.createElement('div');
-    subject_div.className = 'col-4';
-    subject_div.id = `subject${email.id}`;
-    subject_div.innerHTML = `Subject: ${email.subject}`;
-    email_header_row1.append(subject_div);
+    let recipients_div = document.createElement('div');
+    recipients_div.className = 'col-4 ellipsis-line';
+    recipients_div.id = `recipients${email.id}`;
+    recipients_div.innerHTML = `To: ${email.recipients}`;
+    email_header_row1.append(recipients_div);
 
-    let timestamp_div = document.createElement('div');
-    timestamp_div.className = 'col-3';
-    timestamp_div.id = `sent${email.id}`;
-    timestamp_div.innerHTML = `Sent on ${email.timestamp}`;
-    email_header_row1.append(timestamp_div);
+    // add div for reply/archive buttons into first header row
+    let email_buttons = document.createElement('div');
+    email_buttons.className = 'col-3';
+    email_buttons.id = 'email-buttons';
+    email_header_row1.append(email_buttons);
 
-    // add spacer and recipients divs to header row 2 
     let spacer_div = document.createElement('div');
     spacer_div.className = 'col-1';
     email_header_row2.append(spacer_div);
 
-    let recipients_div = document.createElement('div');
-    recipients_div.className = 'col-8';
-    recipients_div.id = `recipients${email.id}`;
-    recipients_div.innerHTML = `To: ${email.recipients}`;
-    email_header_row2.append(recipients_div);
+    let subject_div = document.createElement('div');
+    subject_div.className = 'col-8 ellipsis-line';
+    subject_div.id = `subject${email.id}`;
+    subject_div.innerHTML = `Subject: ${email.subject}`;
+    email_header_row2.append(subject_div);
 
-    // add div for reply/archive buttons into header row 2
-    let email_buttons = document.createElement('div');
-    email_buttons.className = 'col-3';
-    email_buttons.id = 'email-buttons';
-    email_header_row2.append(email_buttons);
+    let timestamp_div = document.createElement('div');
+    timestamp_div.className = 'col-3 timestamp';
+    timestamp_div.id = `sent${email.id}`;
+    timestamp_div.innerHTML = `${email.timestamp}`;
+    email_header_row2.append(timestamp_div);
     
     // show buttons for reply and archive, if there aren't already buttons
     if (!email_buttons.querySelector('button')) {
@@ -287,7 +294,7 @@ function view_email(id) {
           // after promise, load inbox so it will show unarchived message
           if (response) {
             load_mailbox('inbox');
-            display_message('info', `Unarchived message from ${sender} re: ${subject}`);
+            display_message('warning', `Unarchived message from ${sender} re: ${subject}`);
           }
 
         } else {
@@ -302,7 +309,7 @@ function view_email(id) {
           // after promise, then load mailbox so archived message won't still show up
           if (response) {
             load_mailbox('inbox');
-            display_message('info', `Archived message from ${sender} re: ${subject}`);
+            display_message('warning', `Archived message from ${sender} re: ${subject}`);
           }
 
         }
@@ -322,13 +329,15 @@ function view_email(id) {
   
   });
 
+  }
   // show email contents and hide mailbox row for selected email
   email_contents_row.style.display = "flex";
   email_contents_row.previousSibling.style.display = "none";
+  email_contents_row.parentElement.scrollIntoView({behavior: "smooth", block: "center"});
 
+  // mark email as read with PUT request
+  // use await/async so request will finish and read status will take effect when inbox next displays
   async function mark_as_read() { 
-    // mark email as read with PUT request
-    // use await/async so request will finish and read status will take effect before displaying message
     let read_response = await fetch(`/emails/${id}`, {
       method: 'PUT',
       body: JSON.stringify({
