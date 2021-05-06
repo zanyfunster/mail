@@ -67,7 +67,34 @@ function display_message(type, message) {
   }, 3000);
 }
 
+// this little function changes the background of the selected menu button to show which mailbox is being viewed
+function selected_menu_button(selected_btn) {
+
+  // get all menu buttons
+  let all_menu_btns = document.querySelectorAll('#chi-menu button');
+  
+  // iterate through menu buttons
+  all_menu_btns.forEach(menu_btn => {
+
+    // if archived selected, change selected_btn name to account for different btn id
+    if (selected_btn == 'archive') {
+      selected_btn = 'archived';
+    }
+
+    // if selected, set btn background color to light gold, otherwise white
+    if (menu_btn.id == selected_btn) {
+      menu_btn.style.backgroundColor = '#fff584';
+    } else {
+      menu_btn.style.backgroundColor = 'white';
+    }
+  });
+}
+
+// show new chi-mail compose view
 function compose_email() {
+
+  // change bg color of selected menu button
+  selected_menu_button('compose');
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
@@ -81,8 +108,12 @@ function compose_email() {
 
 }
 
+// load selected mailbox
 function load_mailbox(mailbox) {
-  
+
+  // change bg color of selected menu button  
+  selected_menu_button(mailbox);
+
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
@@ -141,8 +172,18 @@ function load_mailbox(mailbox) {
       }
 
       // add event listener to view email
-      email_mailbox_row.addEventListener('click', function () {
+      email_mailbox_row.addEventListener('click', function (e) {
+
+        // view email function
         view_email(element.id);
+
+        // scroll to selected email parent element so scrolls to vertical center of window
+        email_mailbox_row.parentElement.scrollIntoView({behavior: "smooth", block: "center"});
+
+        // add border and shadow to highlight open email
+        email_mailbox_row.parentElement.style.boxShadow = '1px 1px 3px #616161';
+        email_mailbox_row.parentElement.style.border = '1px solid #ffae00'
+
       });
 
       // add email_row to #emails-view>#id container
@@ -159,6 +200,7 @@ function load_mailbox(mailbox) {
   });
 }
 
+// opens selected email for viewing by toggling display on mailbox and contents rows
 function view_email(id) {
 
   // if there is NOT (!) something in local storage called viewing
@@ -206,7 +248,7 @@ function view_email(id) {
     });
     email_header_row1.append(close_icon);
 
-    // add remaining header guts for requested email
+    // add lots of divs to hold header guts for requested email
     let sender_div = document.createElement('div');
     sender_div.className = 'col-4 ellipsis-line';
     sender_div.id = `sender${email.id}`;
@@ -264,7 +306,7 @@ function view_email(id) {
       // check if viewing archive mailbox
       let mailbox_name = document.querySelector('#emails-view > h3').innerHTML;
 
-      // if archive, name of button is unarchive; else archive
+      // if viewing archive, name of button is unarchive; else archive
       if (mailbox_name === 'Archive') {
         archive_btn.innerHTML = '<i class="fas fa-inbox"></i> Unarchive';
       } else {
@@ -311,9 +353,7 @@ function view_email(id) {
             load_mailbox('inbox');
             display_message('warning', `Archived message from ${sender} re: ${subject}`);
           }
-
         }
-        
       });
     }
 
@@ -322,6 +362,8 @@ function view_email(id) {
     let body_col = document.createElement('div');
     body_col.className = 'col-12 email-body';
     body_col.innerText = body_text;
+
+    // add these email content divs to appropriate parent divs
     email_body.append(body_col);
     email_contents_col.append(email_header_row1);
     email_contents_col.append(email_header_row2);
@@ -333,7 +375,6 @@ function view_email(id) {
   // show email contents and hide mailbox row for selected email
   email_contents_row.style.display = "flex";
   email_contents_row.previousSibling.style.display = "none";
-  email_contents_row.parentElement.scrollIntoView({behavior: "smooth", block: "center"});
 
   // mark email as read with PUT request
   // use await/async so request will finish and read status will take effect when inbox next displays
@@ -351,13 +392,22 @@ function view_email(id) {
 
 // close email - called by click on close icon in open email
 function close_email(id) {
+
   // get email contents row using email id
   let closing_email_contents = document.querySelector(`#email-contents-row${id}`);
+
   // hide email contents row
   closing_email_contents.style.display = "none";
+
+  // change border and box shadow back to default
+  closing_email_contents.parentElement.style.boxShadow = 'none';
+  closing_email_contents.parentElement.style.border = '1px solid #b0afa2';
+
   // use previousSibling to show mailbox row
   let show_mailbox_row = closing_email_contents.previousSibling;
   show_mailbox_row.style.display = "flex";
+
+  // change styling and icon to show message read
   show_mailbox_row.parentElement.className = 'col-12 email-box read';
   let last_icon = closing_email_contents.previousSibling.querySelector('#status-icon');
   last_icon.innerHTML = '<i class="far fa-envelope-open"></i>';

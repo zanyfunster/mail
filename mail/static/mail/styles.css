@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+  }
+
 textarea {
     min-height: 400px;
 }
@@ -32,14 +36,14 @@ h5 {
 }
 
 a {
-    color: gold;
+    color: #ffd700;
     font-weight: 600;
 }
 
 a:hover {
     font-weight: 600;
     text-decoration: none;
-    color: rgb(255, 174, 0);
+    color: #ffae00;
     text-shadow: 1px 1px 2px #464646;
 }
 
@@ -101,21 +105,21 @@ h3 {
     padding: 25px;
     background-color: white;
     overflow-y: scroll;
-    border: 1px solid darkslategray;
+    border: 1px solid #454545;
 }
 
 .btn {
     margin-right: 20px;
-    border: 1px solid rgb(75, 75, 75);
+    border: 1px solid #4b4b4b;
     background-color: white;
     color: black;
     font-weight: 600;
 }
 
 .btn:hover {
-    background-color: gold;
+    background-color: gold !important;
     font-weight: 600;
-    border: 1px solid rgb(40, 40, 40);
+    border: 1px solid #282828;
 }
 
 .btn:focus {
